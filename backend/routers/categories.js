@@ -8,7 +8,7 @@ const express = require("express");
 
 // 1.2. INTERNAL DEPENDENCIES ..................................................
 
-const Category = require("../models/categories");
+const Category = require("../models/category");
 
 // 1.2. END ....................................................................
 

@@ -9,8 +9,8 @@ const mongoose = require("mongoose");
 
 // 1.2. INTERNAL DEPENDENCIES ..................................................
 
-const Product = require("../models/products");
-const Category = require("../models/categories");
+const Product = require("../models/product");
+const Category = require("../models/category");
 
 // 1.2. END ....................................................................
 
@@ -70,7 +70,7 @@ router.get("/get/count", async (req, res) => {
 
 router.get("/get/featured/:count", async (req, res) => {
   const count = req.params.count ? req.params.count : 0;
-
+  console.log("Count: ", +req.params.count);
   const featuredProducts = await Product.find({ isFeatured: true }).limit(
     +count
   );

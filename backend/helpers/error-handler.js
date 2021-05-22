@@ -1,9 +1,6 @@
-// [ MODELS > PRODUCTS ] #######################################################
+// [ MAIN DIR > SUB DIR ] ######################################################
 
 // 1.1. EXTERNAL DEPENDENCIES ..................................................
-
-const mongoose = require("mongoose");
-
 // 1.1. END ....................................................................
 
 // 1.2. INTERNAL DEPENDENCIES ..................................................
@@ -18,27 +15,16 @@ const mongoose = require("mongoose");
 // 1.5. MAIN ...................................................................
 
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
-
-// Schema
-const orderSchema = mongoose.Schema({
-  name: String,
-  image: String,
-  countInStock: {
-    type: Number,
-    required: true,
-  },
-});
-
-// Converting MongoDB "_id" field to "id"
-orderSchema.virtual("id").get(() => {
-  return this._id.toHexString();
-});
-
-// Allowing quiries to fetch virtual fields
-orderSchema.set("toJSON", { virtuals: true });
-
-// Model
-const Order = mongoose.model("Order", orderSchema);
+const errorHandler = (error, req, res, next) => {
+  switch (error.name) {
+    case "UnauthorizedError":
+      return res.status(401).json({ message: "The user is not authorized" });
+    case "ValidationError":
+      return res.status(401).json({ message: error });
+    default:
+      return res.status(500).json(error);
+  }
+};
 
 // 1.5.2. END
 
@@ -47,6 +33,6 @@ const Order = mongoose.model("Order", orderSchema);
 // 1.6. STYLES .................................................................
 // 1.6. END ....................................................................
 
-module.exports = Order;
+module.exports = errorHandler;
 
 // END FILE ####################################################################

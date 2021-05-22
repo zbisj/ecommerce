@@ -72,12 +72,14 @@ const productSchema = mongoose.Schema({
 });
 
 // Converting MongoDB "_id" field to "id"
-productSchema.virtual("id").get(() => {
+productSchema.virtual("id").get(function () {
   return this._id.toHexString();
 });
 
 // Allowing quiries to fetch virtual fields
-productSchema.set("toJSON", { virtuals: true });
+productSchema.set("toJSON", {
+  virtuals: true,
+});
 
 // Model
 const Product = mongoose.model("Product", productSchema);

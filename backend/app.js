@@ -12,9 +12,11 @@ const mongoose = require("mongoose");
 
 // 1.2. INTERNAL DEPENDENCIES ..................................................
 
+const authJwt = require("./helpers/jwt");
 const usersRouter = require("./routers/users");
 const ordersRouter = require("./routers/orders");
 const productsRouter = require("./routers/products");
+const errorHandler = require("./helpers/error-handler");
 const categoriesRouter = require("./routers/categories");
 
 // 1.2. END ....................................................................
@@ -37,6 +39,8 @@ app.use(cors());
 app.options("*", cors());
 app.use(express.json());
 app.use(morgan("tiny"));
+app.use(authJwt());
+app.use(errorHandler);
 
 // DATABASE CONNECTION
 mongoose

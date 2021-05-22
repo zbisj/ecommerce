@@ -1,15 +1,12 @@
-// [ ROUTERS > USERS ] #########################################################
+// [ HELPERS > JSON WEB TOKENS] ################################################
 
 // 1.1. EXTERNAL DEPENDENCIES ..................................................
 
-const express = require("express");
+const expressJwt = require("express-jwt");
 
 // 1.1. END ....................................................................
 
 // 1.2. INTERNAL DEPENDENCIES ..................................................
-
-const Order = require("../models/order");
-
 // 1.2. END ....................................................................
 
 // 1.3. IMAGES .................................................................
@@ -21,36 +18,29 @@ const Order = require("../models/order");
 // 1.5. MAIN ...................................................................
 
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
-const router = express.Router();
 
-router.get("/", async (req, res) => {
-  const orderList = await Order.find();
-
-  if (!orderList) {
-    res.status(500).json({ success: false });
-  }
-  res.send(orderList);
-});
-
-router.post("/orders", (req, res) => {
-  const product = new Product({
-    name: req.body.name,
-    image: req.body.image,
-    countInStock: req.body.countInStock,
+function authJwt() {
+  const { API_URL, SECRET } = process.env;
+  return expressJwt({
+    secret: SECRET,
+    algorithms: ["HS256"],
+    isRevoked,
+  }).unless({
+    path: [
+      `${API_URL}/users/login`,
+      `${API_URL}/users/products`,
+      { url: /\/api\/v1\/products(.*)/, methods: ["GET", "'OPTIONS"] },
+      { url: /\/api\/v1\/categories(.*)/, methods: ["GET", "'OPTIONS"] },
+    ],
   });
+}
 
-  product
-    .save()
-    .then((createdProduct) => {
-      res.status(201).json(createdProduct);
-    })
-    .catch((error) => {
-      res.status(500).json({
-        error,
-        success: false,
-      });
-    });
-});
+async function isRevoked(req, payload, done) {
+  if (!payload.isAdmin) {
+    done(null, true);
+  }
+  done();
+}
 // 1.5.2. END
 
 // 1.5. END ....................................................................
@@ -58,6 +48,6 @@ router.post("/orders", (req, res) => {
 // 1.6. STYLES .................................................................
 // 1.6. END ....................................................................
 
-module.exports = router;
+module.exports = authJwt;
 
 // END FILE ####################################################################
