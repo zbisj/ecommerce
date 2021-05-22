@@ -20,17 +20,21 @@ const mongoose = require("mongoose");
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
 
 // Schema
-const productSchema = mongoose.Schema({
-  name: String,
-  image: String,
-  countInStock: {
-    type: Number,
+const categorySchema = mongoose.Schema({
+  name: {
+    type: String,
     required: true,
+  },
+  icon: {
+    type: String,
+  },
+  color: {
+    type: String,
   },
 });
 
 // Model
-const Category = mongoose.model("Category", productSchema);
+const Category = mongoose.model("Category", categorySchema);
 
 // 1.5.2. END
 

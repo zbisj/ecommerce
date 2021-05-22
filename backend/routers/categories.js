@@ -23,34 +23,80 @@ const Category = require("../models/categories");
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
 const router = express.Router();
 
+// GET ROUTES
 router.get("/", async (req, res) => {
-  const orderList = await Product.find();
+  const categoryList = await Category.find();
 
-  if (!orderList) {
+  if (!categoryList) {
     res.status(500).json({ success: false });
   }
-  res.send(orderList);
+  res.status(200).send(categoryList);
 });
 
-router.post("/categories", (req, res) => {
-  const product = new Category({
-    name: req.body.name,
-    image: req.body.image,
-    countInStock: req.body.countInStock,
-  });
+router.get("/:id", async (req, res) => {
+  const category = await Category.findById(req.params.id);
 
-  product
-    .save()
-    .then((createdProduct) => {
-      res.status(201).json(createdProduct);
+  if (!category) {
+    res
+      .status(500)
+      .json({ success: false, message: "The category could not be found" });
+  }
+  res.status(200).send(category);
+});
+
+// POST ROUTES
+router.post("/", async (req, res) => {
+  const category = new Category({
+    name: req.body.name,
+    icon: req.body.icon,
+    color: req.body.color,
+  }) //prettier-ignore
+
+  const results = await category.save();
+
+  if (!results) return res.status(404).send("The category cannot be created!");
+  res.send(results);
+});
+
+// PUT ROUTES
+router.put("/:id", async (req, res) => {
+  const { name, icon, color } = req.body;
+  const category = await Category.findByIdAndUpdate(
+    req.params.id,
+    {
+      name,
+      icon,
+      color
+    },
+    {
+      new: true,
+    },
+  ) //prettier-ignore
+
+  const results = await category.save();
+
+  if (!results) return res.status(404).send("The category cannot be found!");
+  res.send(results);
+});
+
+// DELETE ROUTES
+router.delete("/:id", async (req, res) => {
+  const category = await Category.findByIdAndRemove(req.params.id)
+    .then((deletedCategory) => {
+      if (deletedCategory) {
+        return res
+          .status(200)
+          .send({ success: true, message: "The category has been deleted!" });
+      }
+      return res
+        .status(404)
+        .send({ success: false, message: "The category cannot be found!" });
     })
-    .catch((error) => {
-      res.status(500).json({
-        error,
-        success: false,
-      });
+    .catch((err) => {
+      return res.status(400).send({ success: false, error: err });
     });
 });
+
 // 1.5.2. END
 
 // 1.5. END ....................................................................

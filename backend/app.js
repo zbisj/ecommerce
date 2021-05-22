@@ -43,6 +43,7 @@ mongoose
   .connect(MONGO_URI, {
     dbName: "ecommerce-database",
     useNewUrlParser: true,
+    useFindAndModify: false,
     useUnifiedTopology: true,
   })
   .then(() => console.log("Database connection is ready.."))
