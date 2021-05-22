@@ -33,6 +33,14 @@ const categorySchema = mongoose.Schema({
   },
 });
 
+// Converting MongoDB "_id" field to "id"
+categorySchema.virtual("id").get(() => {
+  return this._id.toHexString();
+});
+
+// Allowing quiries to fetch virtual fields
+categorySchema.set("toJSON", { virtuals: true });
+
 // Model
 const Category = mongoose.model("Category", categorySchema);
 

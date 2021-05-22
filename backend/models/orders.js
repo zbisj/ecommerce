@@ -20,7 +20,7 @@ const mongoose = require("mongoose");
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
 
 // Schema
-const productSchema = mongoose.Schema({
+const orderSchema = mongoose.Schema({
   name: String,
   image: String,
   countInStock: {
@@ -29,8 +29,16 @@ const productSchema = mongoose.Schema({
   },
 });
 
+// Converting MongoDB "_id" field to "id"
+orderSchema.virtual("id").get(() => {
+  return this._id.toHexString();
+});
+
+// Allowing quiries to fetch virtual fields
+orderSchema.set("toJSON", { virtuals: true });
+
 // Model
-const Order = mongoose.model("Order", productSchema);
+const Order = mongoose.model("Order", orderSchema);
 
 // 1.5.2. END
 
