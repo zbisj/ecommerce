@@ -1,4 +1,4 @@
-// [ MODELS > CATEGORY ] #######################################################
+// [ MODELS > ORDER ITEM ] #####################################################
 
 // 1.1. EXTERNAL DEPENDENCIES ..................................................
 
@@ -20,31 +20,29 @@ const mongoose = require("mongoose");
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
 
 // Schema
-const categorySchema = mongoose.Schema({
-  name: {
-    type: String,
+const orderItemSchema = mongoose.Schema({
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+  },
+  quantity: {
+    type: Number,
     required: true,
-  },
-  icon: {
-    type: String,
-  },
-  color: {
-    type: String,
   },
 });
 
 // Converting MongoDB "_id" field to "id"
-categorySchema.virtual("id").get(function () {
-  if (this._id) return this._id.toHexString();
+orderItemSchema.virtual("id").get(function () {
+  return this._id.toHexString();
 });
 
 // Allowing quiries to fetch virtual fields
-categorySchema.set("toJSON", {
+orderItemSchema.set("toJSON", {
   virtuals: true,
 });
 
 // Model
-const Category = mongoose.model("Category", categorySchema);
+const OrderItem = mongoose.model("OrderItem", orderItemSchema);
 
 // 1.5.2. END
 
@@ -53,6 +51,6 @@ const Category = mongoose.model("Category", categorySchema);
 // 1.6. STYLES .................................................................
 // 1.6. END ....................................................................
 
-module.exports = Category;
+module.exports = OrderItem;
 
 // END FILE ####################################################################

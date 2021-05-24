@@ -21,10 +21,51 @@ const mongoose = require("mongoose");
 
 // Schema
 const orderSchema = mongoose.Schema({
-  name: String,
-  image: String,
-  countInStock: {
+  zip: {
+    type: String,
+    required: true,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Users",
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  phone: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    require: true,
+    default: "Pending",
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+  totalPrice: {
     type: Number,
+  },
+  orderItems: [
+    {
+      ref: "OrderItem",
+      type: mongoose.Schema.Types.ObjectId,
+      require: true,
+    },
+  ],
+  dateOrdered: {
+    type: Date,
+    default: Date.now,
+  },
+  shippingAddress1: {
+    type: String,
+    required: true,
+  },
+  shippingAddress2: {
+    type: String,
     required: true,
   },
 });
