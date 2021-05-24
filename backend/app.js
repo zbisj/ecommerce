@@ -3,6 +3,7 @@
 // 1.1. EXTERNAL DEPENDENCIES ..................................................
 
 require("dotenv/config");
+const path = require("path");
 const cors = require("cors");
 const morgan = require("morgan");
 const express = require("express");
@@ -36,11 +37,15 @@ const { API_URL, MONGO_URI } = process.env;
 
 // MIDDLEWARE
 app.use(cors());
+app.use(authJwt());
+app.use(errorHandler);
 app.options("*", cors());
 app.use(express.json());
 app.use(morgan("tiny"));
-app.use(authJwt());
-app.use(errorHandler);
+app.use(
+  "/public/uploads",
+  express.static(path.join(__dirname, "/public/uploads"))
+);
 
 // DATABASE CONNECTION
 mongoose

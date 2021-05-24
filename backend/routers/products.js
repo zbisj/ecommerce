@@ -2,6 +2,7 @@
 
 // 1.1. EXTERNAL DEPENDENCIES ..................................................
 
+const multer = require("multer");
 const express = require("express");
 const mongoose = require("mongoose");
 
@@ -25,9 +26,34 @@ const Category = require("../models/category");
 // 1.5.2. FUNCTIONS & LOCAL VARIABLES
 const router = express.Router();
 
+const FILE_TYPE_MAP = {
+  "image/png": "png",
+  "image/jpg": "jpg",
+  "image/jpeg": "jpeg",
+};
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const isValidImage = FILE_TYPE_MAP[file.mimetype];
+    let uploadError = new Error("Invalid image type");
+    if (isValidImage) {
+      uploadError = null;
+    }
+    cb(uploadError, "public/uploads");
+  },
+  filename: function (req, file, cb) {
+    const extension = FILE_TYPE_MAP[file.mimetype];
+    const fileName = file.originalname.split(" ").join("-");
+
+    cb(null, `${fileName}-${Date.now()}.${extension}`);
+  },
+});
+
+const uploadOptions = multer({ storage: storage });
+
 const validateId = (req, res) => {
   if (!mongoose.isValidObjectId(req.params.id)) {
-    res.status(400).send("invalid product id.");
+    res.status(400).send("Invalid product id.");
   }
 };
 
@@ -82,11 +108,10 @@ router.get("/get/featured/:count", async (req, res) => {
 });
 
 // POST ROUTES
-router.post("/", async (req, res) => {
+router.post("/", uploadOptions.single("image"), async (req, res) => {
   const {
     name,
     price,
-    image,
     images,
     rating,
     category,
@@ -96,6 +121,12 @@ router.post("/", async (req, res) => {
     countInStock,
     richDescription,
   } = req.body;
+
+  const file = req.file;
+  if (!file) return res.status(400).send("This request has no image!");
+
+  const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+  const image = `${basePath}${req.file.filename}`;
 
   const incomingCategory = await Category.findById(category);
   if (!incomingCategory) return res.status(400).send("Invalid category!");
@@ -122,11 +153,10 @@ router.post("/", async (req, res) => {
 });
 
 // PUT ROUTES
-router.put("/:id", async (req, res) => {
+router.put("/:id", uploadOptions.single("image"), async (req, res) => {
   const {
     name,
     price,
-    image,
     images,
     rating,
     category,
@@ -139,8 +169,21 @@ router.put("/:id", async (req, res) => {
 
   validateId(req, res);
 
-  const incomingProduct = await Category.findById(category);
-  if (!incomingProduct) return res.status(400).send("Invalid category!");
+  const incomingProduct = await Product.findById(req.params.id);
+  if (!incomingProduct) return res.status(400).send("Invalid product Id!");
+
+  const incomingCategory = await Category.findById(category);
+  if (!incomingCategory) return res.status(400).send("Invalid category!");
+
+  const file = req.file;
+  let image;
+
+  if (file) {
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+    image = `${basePath}${req.file.filename}`;
+  } else {
+    image = incomingProduct.image;
+  }
 
   const product = await Product.findByIdAndUpdate(
     req.params.id,
@@ -167,6 +210,35 @@ router.put("/:id", async (req, res) => {
   if (!results) return res.status(500).send("The product cannot be updated!");
   res.send(results);
 });
+
+router.put(
+  "/gallery-images/:id",
+  uploadOptions.array("images", 10),
+  async (req, res) => {
+    validateId(req, res);
+
+    const files = req.files;
+    const images = [];
+    const basePath = `${req.protocol}://${req.get("host")}/public/uploads/`;
+
+    if (files) {
+      files.map((file) => images.push(`${basePath}${file.filename}`));
+    }
+
+    const results = await Product.findByIdAndUpdate(
+      req.params.id,
+      {
+        images,
+      },
+      {
+        new: true,
+      }
+    );
+
+    if (!results) return res.status(500).send("The product cannot be updated!");
+    res.send(results);
+  }
+);
 
 // DELETE ROUTES
 router.delete("/:id", async (req, res) => {
